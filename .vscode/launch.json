@@ -1,0 +1,31 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Cortex Debug",
+            "cwd": "${workspaceRoot}",
+            "executable": "./BUILD/NUCLEO_L432KC/GCC_ARM/niko-4-6-way-button.elf",
+            "request": "launch",
+            "type": "cortex-debug",
+            "servertype": "bmp",
+            "BMPGDBSerialPort": "COM3",
+            "device": "STM32L432KC",
+            "runToMain": true
+        },
+        {
+            "name": "Cortex Build & Debug",
+            "cwd": "${workspaceRoot}",
+            "executable": "./BUILD/NUCLEO_L432KC/GCC_ARM/niko-4-6-way-button.elf",
+            "request": "launch",
+            "type": "cortex-debug",
+            "servertype": "bmp",
+            "BMPGDBSerialPort": "COM3",
+            "device": "STM32L432KC",
+            "runToMain": true,
+            "preLaunchTask": "build"
+        }
+    ]
+}
