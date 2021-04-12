@@ -1,10 +1,7 @@
 #include "mbed.h"
-#include <chrono>
 #include "lib/ButtonManager.h"
 
 #include "SixPack.h"
-#include "SixPack/Messages/Alive.h"
-#include "SixPack/Messages/Events.h"
 
 using namespace SixPackLib;
 
