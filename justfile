@@ -20,7 +20,7 @@ flash gdb_com_port=gdb_com_port_default:
         -ex 'load' \
         -ex 'compare-sections' \
         -ex 'kill' \
-        ./BUILD/NUCLEO_L432KC/GCC_ARM/spha-rel6-firmware.elf
+        ./BUILD/NUCLEO_L432KC/GCC_ARM/spha-rel12-firmware.elf
 
 test:
     just compile
@@ -28,5 +28,5 @@ test:
     @echo "Done. Waiting for changes..."
 
 watch:
-    # watchexec -w './BUILD/NUCLEO_L432KC/GCC_ARM/spha-rel6-firmware.elf' -s SIGKILL just flash
+    # watchexec -w './BUILD/NUCLEO_L432KC/GCC_ARM/spha-rel12-firmware.elf' -s SIGKILL just flash
     watchexec -w src just test
