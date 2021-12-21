@@ -30,3 +30,7 @@ test:
 watch:
     # watchexec -w './BUILD/NUCLEO_L432KC/GCC_ARM/spha-rel12-firmware.elf' -s SIGKILL just flash
     watchexec -w src just test
+
+
+flash:
+    stflash --reset write ./BUILD/NUCLEO_L432KC/GCC_ARM/spha-rel12-firmware.elf 0x08000000
