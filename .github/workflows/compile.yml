@@ -1,0 +1,32 @@
+name: Mbed Compile
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    container:
+      image: ghcr.io/armmbed/mbed-os-env:master-latest
+    runs-on: ubuntu-latest
+    env:
+      TARGET: NUCLEO_L476RG
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: build-example
+      run: |
+          set -e
+          mbed deploy
+          mbed compile -t GCC_ARM -m ${{ env.TARGET }}
+          
+    - uses: ncipollo/release-action@v1
+      with:
+        artifacts: BUILD/${{ env.TARGET }}/GCC_ARM/*.bin
+        token: ${{ secrets.GITHUB_TOKEN }}
+        allowUpdates: true
+
+
+      
