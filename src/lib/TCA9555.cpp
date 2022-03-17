@@ -27,8 +27,14 @@ void TCA9555::enableOutputs(){
 }
 
 void TCA9555::write(uint8_t index, uint8_t state) {
-    uint8_t status = i2c_read_uint8(CMD_INPUT_PORT_0);
-    status = ~status;
-    char buffer[2] = { CMD_OUTPUT_PORT_0, status };
-    i2c->write(I2C_ADDRESS, buffer, 2);
+    uint16_t status = read();
+    if(state) {
+        status |= 1UL << index;
+    } else {
+        status &= ~(1UL << index);
+    }
+    uint8_t outputPort0 = status & 0xFF;
+    uint8_t outputPort1 = (status >> 8) & 0xFF;
+    char buffer[3] = { CMD_OUTPUT_PORT_0, outputPort0, outputPort1 };
+    i2c->write(I2C_ADDRESS, buffer, 3);
 }

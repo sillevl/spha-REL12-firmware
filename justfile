@@ -1,4 +1,4 @@
-gdb_com_port_default := "COM3"
+gdb_com_port_default := "COM4"
 
 recipe-name:
     echo 'This is a recipe!'
@@ -20,13 +20,13 @@ flash gdb_com_port=gdb_com_port_default:
         -ex 'load' \
         -ex 'compare-sections' \
         -ex 'kill' \
-        ./BUILD/NUCLEO_L432KC/GCC_ARM/spha-rel6-firmware.elf
+        ./BUILD/NUCLEO_L432KC/GCC_ARM/spha-rel12-firmware.elf
 
-test:
+test gdb_com_port=gdb_com_port_default:
     just compile
-    just flash
+    just flash {{gdb_com_port}}
     @echo "Done. Waiting for changes..."
 
 watch:
-    # watchexec -w './BUILD/NUCLEO_L432KC/GCC_ARM/spha-rel6-firmware.elf' -s SIGKILL just flash
+    # watchexec -w './BUILD/NUCLEO_L432KC/GCC_ARM/spha-rel12-firmware.elf' -s SIGKILL just flash
     watchexec -w src just test

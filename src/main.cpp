@@ -1,6 +1,7 @@
 #include "mbed.h"
 
 #include "SixPack.h"
+#include "Events.h"
 
 using namespace SixPackLib;
 
@@ -34,9 +35,9 @@ int toggle = 0;
 int state = 0;
 
 DigitalOut statusLed(STATUS_LED);
-InterruptIn button(BOOT_0_PIN);
-Timer timer;
-uint64_t lastPress;
+// InterruptIn button(BOOT_0_PIN);
+// Timer timer;
+// uint64_t lastPress;
 
 
 AnalogIn internalTemperature(ADC_TEMP);
@@ -52,92 +53,54 @@ void measureTemperature() {
         printf("Temperature: %d\r\nVoltage (mv): %d\r\n", temp, volt);
 }
 
-void buttonPress() {
-    uint32_t now = std::chrono::duration_cast<std::chrono::milliseconds>(timer.elapsed_time()).count();
-    if(now > lastPress + 200 ){
-        state++;
-        state = state % 2;
-    }
-    lastPress = now;
-}
+// void buttonPress() {
+//     uint32_t now = std::chrono::duration_cast<std::chrono::milliseconds>(timer.elapsed_time()).count();
+//     if(now > lastPress + 200 ){
+//         state++;
+//         state = state % 2;
+//     }
+//     lastPress = now;
+// }
 
 void setRelay(uint8_t index, bool state) {
+
+    printf("SET RELAY: %d, %d\r\n", (int) index, (int) state);
     float brightness = state ? 1.0 : 0.0;
     frontPanel.setChannel(15 - index, brightness);
     tca9555.write(index, state);
+    sixPack.send( Events::RelayUpdate(index, state) );
+}
+
+void resetRelays() {
+    for(int i = 0; i<12; i++) {
+        setRelay(i, false);
+    }
 }
 
 
 int main() {
     sixPack.setStatusLed(COMMS_LED);
-    char test = 0xAA;
-    can.write(CANMessage(1337, &test, 1));
     printf("*** Relays module 12 channels ***\r\n");
     statusLed = 0;
-    timer.start();
 
-    button.rise(&buttonPress);
 
     
     frontPanel.enable();
-
-    for(int i = 0; i<12; i++) {
-        setRelay(i, false);
-    }
+    resetRelays();
     tca9555.enableOutputs();
-    ThisThread::sleep_for(1s);
 
-
-
-    for(int i = 0; i<12; i++) {
-        setRelay(i, true);
-        ThisThread::sleep_for(1s);
-        setRelay(i, false);
-        ThisThread::sleep_for(1s);
-    }
-
-
-    int temp = state;
-    while(true) {
-        statusLed = !button.read();
-        if(temp != state){
-            printf("state: %d, temp: %d\r\n", state, temp);
-            if(state == 1) {
-                for(int i = 0; i<12; i++) {
-                    setRelay(i, true);
-                    ThisThread::sleep_for(10ms);
-                }
-            }
-
-            if(state == 0) {
-                for(int i = 0; i<12; i++) {
-                    setRelay(i, false);
-                    ThisThread::sleep_for(10ms);
-                }
-            }
-            temp = state;
-        }
-
-    }
-
-
-    tca9555.write(0, toggle);
-
-    queue.call_every(60min, []() {
-        tca9555.write(0, toggle);
-        // led = toggle;
-        toggle = !toggle;
+    sixPack.relayUpdateEvent([](SixPack::RelayUpdateStatus status) {
+        printf("RELAY UPDATE STATUS !!! %d, %d\r\n", (int) status.index, (int) status.state);
+        setRelay(status.index, status.state);
     });
 
-    queue.call_every(30s, [](){
-        int voltage = vrefint.read_u16() >> 4;
-        int volt = __LL_ADC_CALC_VREFANALOG_VOLTAGE(voltage, LL_ADC_RESOLUTION_12B);
+    // for(int i = 0; i<12; i++) {
+    //     setRelay(i, true);
+    //     ThisThread::sleep_for(1s);
+    //     setRelay(i, false);
+    //     ThisThread::sleep_for(1s);
+    // }
 
-        int temp12 = internalTemperature.read_u16() >> 4;
-        int temp = __LL_ADC_CALC_TEMPERATURE(volt, temp12, LL_ADC_RESOLUTION_12B);
-
-        printf("Temperature: %d\r\nVoltage (mv): %d\r\n", temp, volt);
-    });
 
     queue.dispatch_forever();
 
